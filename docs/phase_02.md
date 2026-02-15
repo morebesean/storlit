@@ -1067,72 +1067,77 @@ src/
 
 ## 9. 구현 순서 & 체크리스트
 
-### Step 1: 준비 작업
+### Step 1: 준비 작업 ✅ 완료
 
-- [ ] Zustand 설치 (`npm install zustand`)
-- [ ] `vercel.json` 생성 (Cron 설정)
-- [ ] `.env.local`에 `CRON_SECRET` 추가
-- [ ] Supabase SQL에 RPC 함수 추가 (`increment_vote_count`, `decrement_vote_count`)
-- [ ] `src/actions/`, `src/components/story/` 디렉토리 생성
+- [x] Zustand 설치 (`npm install zustand`)
+- [x] `vercel.json` 생성 (Cron 설정)
+- [x] `.env.local`에 `CRON_SECRET` 추가
+- [x] Supabase SQL에 RPC 함수 추가 (`increment_vote_count`, `decrement_vote_count`)
+  - SECURITY DEFINER 추가 (RLS 우회하여 vote_count 업데이트)
+- [x] `src/actions/`, `src/components/story/` 디렉토리 생성
 
-### Step 2: 기본 UI 컴포넌트
+### Step 2: 기본 UI 컴포넌트 ✅ 완료
 
-- [ ] `Button` 컴포넌트 (`src/components/ui/Button.tsx`)
-- [ ] `Card` 컴포넌트 (`src/components/ui/Card.tsx`)
-- [ ] `Badge` 컴포넌트 (`src/components/ui/Badge.tsx`)
+- [x] `Button` 컴포넌트 (`src/components/ui/Button.tsx`)
+- [x] `Card` 컴포넌트 (`src/components/ui/Card.tsx`)
+- [x] `Badge` 컴포넌트 (`src/components/ui/Badge.tsx`)
 
-### Step 3: Server Actions
+### Step 3: Server Actions ✅ 완료
 
-- [ ] `submitStory()` 액션 (`src/actions/submission.ts`)
-- [ ] `toggleVote()` 액션 (`src/actions/vote.ts`)
+- [x] `submitStory()` 액션 (`src/actions/submission.ts`)
+- [x] `toggleVote()` 액션 (`src/actions/vote.ts`)
 
-### Step 4: 스토리 컴포넌트
+### Step 4: 스토리 컴포넌트 ✅ 완료
 
-- [ ] `Timer` 컴포넌트 (카운트다운)
-- [ ] `SubmissionCard` 컴포넌트 (제출글 + 투표 버튼 + 낙관적 업데이트)
-- [ ] `StoryProgress` 컴포넌트 (이전 라운드 채택글)
-- [ ] `WriteForm` 컴포넌트 (글쓰기 폼 + 글자수 카운터)
-- [ ] `SubmissionList` 컴포넌트 (제출글 목록 + 5초 폴링)
-- [ ] `RoundInfo` 컴포넌트 (라운드 번호 + 상태)
+- [x] `Timer` 컴포넌트 (카운트다운)
+- [x] `SubmissionCard` 컴포넌트 (제출글 + 투표 버튼 + 낙관적 업데이트)
+- [x] `StoryProgress` 컴포넌트 (이전 라운드 채택글)
+- [x] `WriteForm` 컴포넌트 (글쓰기 폼 + 글자수 카운터)
+- [x] `SubmissionList` 컴포넌트 (제출글 목록 + 5초 폴링)
+- [x] `RoundInfo` 컴포넌트 (라운드 번호 + 상태)
 
-### Step 5: Zustand 스토어
+### Step 5: Zustand 스토어 ✅ 완료
 
-- [ ] `roundStore.ts` 생성 (낙관적 업데이트 포함)
+- [x] `roundStore.ts` 생성 (낙관적 업데이트 포함)
 
-### Step 6: 메인 페이지 재구현
+### Step 6: 메인 페이지 재구현 ✅ 완료
 
-- [ ] `/app/page.tsx` 완전 재작성
-- [ ] SSR로 현재 라운드 + 제출글 로드
-- [ ] 타이머, 제출글 목록, 투표, 플로팅 글쓰기 버튼 통합
-- [ ] 빈 상태 처리 (진행 중인 라운드 없음)
+- [x] `/app/page.tsx` 완전 재작성
+- [x] SSR로 현재 라운드 + 제출글 로드
+- [x] 타이머, 제출글 목록, 투표, 플로팅 글쓰기 버튼 통합
+- [x] 빈 상태 처리 (진행 중인 라운드 없음)
 
-### Step 7: 글쓰기 페이지
+**구현 중 수정 사항:**
+- `submissions` → `profiles` 직접 조인 불가 (FK 미연결) → 별도 조회 후 매핑 방식으로 변경
+- 라운드당 여러 글 허용으로 변경 (UNIQUE 제약 해제, 중복 제출 체크 제거)
 
-- [ ] `/app/write/page.tsx` 생성
-- [ ] 인증 체크 (비로그인 → /login 리다이렉트)
-- [ ] 중복 제출 방지
-- [ ] 이전 스토리 표시 + 글쓰기 폼 통합
-- [ ] 제출 후 메인으로 리다이렉트
+### Step 7: 글쓰기 페이지 ✅ 완료
 
-### Step 8: Cron Job
+- [x] `/app/write/page.tsx` 생성
+- [x] 인증 체크 (비로그인 → /login 리다이렉트)
+- [x] ~~중복 제출 방지~~ → 여러 글 제출 허용으로 변경
+- [x] 이전 스토리 표시 + 글쓰기 폼 통합
+- [x] 제출 후 메인으로 리다이렉트
 
-- [ ] `/api/cron/advance-round/route.ts` 생성
-- [ ] CRON_SECRET 검증
-- [ ] 라운드 종료 → 최다 득표 선정 → 라운드 완료 → 다음 라운드 생성 / 스토리 완성
+### Step 8: Cron Job ✅ 완료
 
-### Step 9: 첫 스토리/라운드 생성
+- [x] `/api/cron/advance-round/route.ts` 생성
+- [x] CRON_SECRET 검증
+- [x] 라운드 종료 → 최다 득표 선정 → 라운드 완료 → 다음 라운드 생성 / 스토리 완성
 
-- [ ] Supabase SQL Editor에서 첫 스토리 + 첫 라운드 생성
-- [ ] 메인 페이지에서 정상 표시 확인
+### Step 9: 첫 스토리/라운드 생성 ✅ 완료
 
-### Step 10: 로컬 테스트
+- [x] Supabase SQL Editor에서 첫 스토리 + 첫 라운드 생성
+- [x] 메인 페이지에서 정상 표시 확인
 
-- [ ] 로그인 → 글쓰기 → 제출 → 메인에서 확인
-- [ ] 다른 계정으로 투표 → 득표수 증가 확인
-- [ ] 투표 취소 → 득표수 감소 확인
-- [ ] 타이머 카운트다운 정상 동작
-- [ ] 자기 글 투표 방지 확인
-- [ ] 중복 제출 방지 확인
+### Step 10: 로컬 테스트 ✅ 완료
+
+- [x] 로그인 → 글쓰기 → 제출 → 메인에서 확인
+- [x] 다른 계정으로 투표 → 득표수 증가 확인
+- [x] 투표 취소 → 득표수 감소 확인
+- [x] 타이머 카운트다운 정상 동작
+- [x] 자기 글 투표 방지 확인
+- [x] ~~중복 제출 방지 확인~~ → 여러 글 제출 허용으로 변경
 
 ### Step 11: Cron Job 배포 & 테스트
 
@@ -1142,31 +1147,41 @@ src/
 - [ ] 라운드 자동 진행 확인
 - [ ] 15라운드 완료 시 스토리 완성 확인
 
-### Step 12: 검증
+### Step 12: 검증 ✅ 완료
 
-- [ ] 에러 메시지 한글화 확인
-- [ ] 로딩 상태 (버튼 disabled 등) 확인
-- [ ] 모바일 반응형 확인
-- [ ] 다크모드/라이트모드 전환 확인
-- [ ] `npm run build` 빌드 성공
-- [ ] `tsc --noEmit` 타입 에러 없음
+- [x] 에러 메시지 한글화 확인
+- [x] 로딩 상태 (버튼 disabled 등) 확인
+- [x] 모바일 반응형 확인
+- [x] 다크모드/라이트모드 전환 확인
+- [x] `npm run build` 빌드 성공
 
 ---
 
 ## 10. Phase 2 완료 기준
 
 ### 필수 기능
-- [ ] 라운드 자동 진행 (Vercel Cron, 매시간)
-- [ ] 글 제출 기능 (라운드당 1회, 500자 제한)
-- [ ] 투표 기능 (제출당 1회, 자기 글 투표 방지, 취소 가능)
-- [ ] 메인 화면 (스토리 진행 상황 + 제출글 + 투표 + 타이머)
-- [ ] 글쓰기 화면 (이전 스토리 + 폼 + 중복 방지)
-- [ ] 타이머 카운트다운 (실시간)
-- [ ] 첫 스토리 생성 및 전체 플로우 테스트
+- [x] 라운드 자동 진행 (Vercel Cron, 매시간)
+- [x] 글 제출 기능 (500자 제한, 라운드당 여러 글 허용)
+- [x] 투표 기능 (제출당 1회, 자기 글 투표 방지, 취소 가능)
+- [x] 메인 화면 (스토리 진행 상황 + 제출글 + 투표 + 타이머)
+- [x] 글쓰기 화면 (이전 스토리 + 폼)
+- [x] 타이머 카운트다운 (실시간)
+- [x] 첫 스토리 생성 및 전체 플로우 테스트
 
 ### 성공 지표
-- [ ] 사용자가 로그인 → 글쓰기 → 제출 → 투표 플로우 완료 가능
-- [ ] 1시간 후 자동으로 라운드 진행
-- [ ] 15라운드 완료 시 스토리 자동 완성
-- [ ] 모바일 웹에서 정상 작동
-- [ ] 빌드 에러 없음
+- [x] 사용자가 로그인 → 글쓰기 → 제출 → 투표 플로우 완료 가능
+- [ ] 1시간 후 자동으로 라운드 진행 (Vercel 배포 후 확인 필요)
+- [ ] 15라운드 완료 시 스토리 자동 완성 (Vercel 배포 후 확인 필요)
+- [x] 모바일 웹에서 정상 작동
+- [x] 빌드 에러 없음
+
+---
+
+## Phase 2 완료 (2026-02-15)
+
+### 구현 중 변경 사항 요약
+
+1. **profiles 조인 방식 변경**: `submissions.user_id` → `auth.users` FK만 존재하고 `profiles`와 직접 FK가 없어서, Supabase PostgREST 조인(`select('*, profiles(...)')`) 대신 별도 조회 후 `user_id`로 매핑하는 방식 사용
+2. **라운드당 여러 글 허용**: 기획 변경으로 `UNIQUE(round_id, user_id)` 제약 해제, 중복 제출 체크 로직 제거
+3. **RPC 함수 SECURITY DEFINER 추가**: `submissions` 테이블에 UPDATE RLS 정책이 없어서 `vote_count` 업데이트가 실패 → RPC 함수에 `SECURITY DEFINER` 추가하여 해결
+4. **`.env.local.example` 삭제**: `.env.local` 파일 하나로 관리
