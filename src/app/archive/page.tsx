@@ -1,4 +1,4 @@
-export default function Home() {
+export default function ArchivePage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
       <svg
@@ -10,14 +10,14 @@ export default function Home() {
         strokeWidth="1.5"
         className="text-text-tertiary mb-4"
       >
-        <path d="M12 20h9" />
-        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
       </svg>
       <p className="text-text-secondary text-sm">
-        현재 진행 중인 스토리가 없습니다
+        아직 완성된 스토리가 없습니다
       </p>
       <p className="text-text-tertiary text-xs mt-1">
-        새로운 릴레이 소설이 시작되면 여기에서 참여할 수 있습니다
+        첫 번째 릴레이 소설이 완성되면 여기에 표시됩니다
       </p>
     </div>
   );
