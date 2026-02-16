@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 
 // 한국 시간대 (KST = UTC+9)
@@ -92,6 +93,7 @@ export async function GET(request: Request) {
         status: 'active',
       });
 
+      revalidatePath('/');
       return NextResponse.json({
         message: 'New story started',
         story_id: newStory.id,
@@ -149,6 +151,7 @@ export async function GET(request: Request) {
       })
       .eq('id', story.id);
 
+    revalidatePath('/');
     return NextResponse.json({
       message: 'Story completed',
       story_id: story.id,
@@ -168,6 +171,7 @@ export async function GET(request: Request) {
     status: 'active',
   });
 
+  revalidatePath('/');
   return NextResponse.json({
     message: 'Round advanced',
     next_round: nextRoundNumber,

@@ -4,6 +4,8 @@ import { CurrentRoundInfo } from '@/components/story/CurrentRoundInfo';
 import { SubmissionList } from '@/components/story/SubmissionList';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 function getContent(
   submissions: { content: string }[] | { content: string } | null
 ): string | null {
