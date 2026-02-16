@@ -640,40 +640,40 @@ public/
 
 ### Step 1: OG 메타태그
 
-- [ ] `src/app/layout.tsx` — openGraph, twitter 메타데이터 추가
-- [ ] `src/app/archive/[id]/page.tsx` — `generateMetadata` 함수 추가
-- [ ] 환경변수 `NEXT_PUBLIC_SITE_URL` 추가
+- [x] `src/app/layout.tsx` — openGraph, twitter 메타데이터 추가
+- [x] `src/app/archive/[id]/page.tsx` — `generateMetadata` 함수 추가
+- [x] 환경변수 `NEXT_PUBLIC_SITE_URL` 추가
 
 ### Step 2: 공유 컴포넌트
 
-- [ ] `src/components/share/ShareButton.tsx` — Web Share API + 클립보드 폴백
-- [ ] `src/components/share/TwitterShareButton.tsx` — Twitter Intent URL
-- [ ] `src/components/share/KakaoShareButton.tsx` — 카카오 SDK 동적 로드 + 공유
-- [ ] `src/app/archive/[id]/page.tsx` — 공유 버튼 그룹 배치
-- [ ] 환경변수 `NEXT_PUBLIC_KAKAO_JS_KEY` 추가
+- [x] `src/components/share/ShareButton.tsx` — Web Share API + 클립보드 폴백
+- [x] `src/components/share/TwitterShareButton.tsx` — Twitter Intent URL
+- [x] `src/components/share/KakaoShareButton.tsx` — 카카오 SDK 동적 로드 + 공유
+- [x] `src/app/archive/[id]/page.tsx` — 공유 버튼 그룹 배치
+- [x] 환경변수 `NEXT_PUBLIC_KAKAO_JS_KEY` 추가
 
 ### Step 3: PWA 설정
 
-- [ ] `public/manifest.json` 생성
-- [ ] `public/icons/` — PWA 아이콘 5개 생성 (192, 512, maskable, apple-touch)
-- [ ] `src/app/layout.tsx` — manifest 링크 + apple-mobile-web-app 메타태그 추가
+- [x] `public/manifest.json` 생성
+- [x] `public/icons/` — PWA 아이콘 5개 생성 (192, 512, maskable, apple-touch)
+- [x] `src/app/layout.tsx` — manifest 링크 + apple-mobile-web-app 메타태그 추가
 
 ### Step 4: 어뷰징 방지 강화
 
-- [ ] `src/actions/submission.ts` — 라운드당 최대 3개 제출 제한
-- [ ] `src/actions/vote.ts` — 종료된 라운드 투표 차단 (submission 조회 시 round_id 포함, 라운드 상태 체크)
+- [x] `src/actions/submission.ts` — 라운드당 최대 3개 제출 제한
+- [x] `src/actions/vote.ts` — 종료된 라운드 투표 차단 (submission 조회 시 round_id 포함, 라운드 상태 체크)
 
 ### Step 5: QA
 
-- [ ] `npm run build` 빌드 성공
-- [ ] `npm run lint` 경고 확인
+- [x] `npm run build` 빌드 성공
+- [x] `npm run lint` 경고 확인
 - [ ] 기능 테스트 체크리스트 전체 수행 (6.2절)
 
 ### Step 6: 배포
 
-- [ ] Vercel Dashboard 환경변수 설정
-- [ ] `git push` → Vercel 자동 배포
-- [ ] 프로덕션 URL 접속 확인
+- [x] Vercel Dashboard 환경변수 설정
+- [x] `git push` → Vercel 자동 배포
+- [x] 프로덕션 URL 접속 확인
 - [ ] Vercel Cron Logs 확인
 - [ ] OG 메타태그 검증 (카카오 디버거)
 - [ ] 모바일 PWA 설치 테스트
@@ -683,11 +683,11 @@ public/
 ## Phase 4 완료 기준
 
 ### 필수 기능
-- [ ] OG 메타태그 (글로벌 + 아카이브 상세)
-- [ ] 공유 버튼 (Web Share + 카카오톡 + 트위터)
-- [ ] PWA manifest + 아이콘 (홈 화면 추가 지원)
-- [ ] 어뷰징 방지 강화 (제출 횟수 제한, 종료 라운드 투표 차단)
-- [ ] Vercel 프로덕션 배포 완료
+- [x] OG 메타태그 (글로벌 + 아카이브 상세)
+- [x] 공유 버튼 (Web Share + 카카오톡 + 트위터)
+- [x] PWA manifest + 아이콘 (홈 화면 추가 지원)
+- [x] 어뷰징 방지 강화 (제출 횟수 제한, 종료 라운드 투표 차단)
+- [x] Vercel 프로덕션 배포 완료
 - [ ] 전체 기능 테스트 통과
 
 ### 성공 지표
