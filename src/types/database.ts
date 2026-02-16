@@ -11,6 +11,7 @@ export interface Story {
   genre: string | null;
   status: 'in_progress' | 'completed';
   total_rounds: number;
+  seed_text: string | null;
   started_at: string;
   completed_at: string | null;
 }

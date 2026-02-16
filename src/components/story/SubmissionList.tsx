@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { SubmissionCard } from './SubmissionCard';
+import { SubmissionHeader } from './SubmissionHeader';
 
 interface SubmissionData {
   id: string;
@@ -28,16 +29,28 @@ export function SubmissionList({
 }: SubmissionListProps) {
   const [submissions, setSubmissions] = useState(initialSubmissions);
   const [myVoteIds, setMyVoteIds] = useState(new Set(initialVoteIds));
+  const [sortBy, setSortBy] = useState<'popular' | 'newest'>('popular');
 
-  // 5초마다 제출글 갱신 (profiles 별도 조회)
+  const sortedSubmissions = useMemo(() => {
+    const sorted = [...submissions];
+    if (sortBy === 'popular') {
+      sorted.sort((a, b) => b.vote_count - a.vote_count);
+    } else {
+      sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+    return sorted;
+  }, [submissions, sortBy]);
+
+  // 5초마다 제출글 갱신
   useEffect(() => {
     const supabase = createClient();
     const interval = setInterval(async () => {
+      const orderColumn = sortBy === 'popular' ? 'vote_count' : 'created_at';
       const { data: rawData } = await supabase
         .from('submissions')
         .select('*')
         .eq('round_id', roundId)
-        .order('vote_count', { ascending: false });
+        .order(orderColumn, { ascending: false });
 
       if (!rawData) return;
 
@@ -63,9 +76,8 @@ export function SubmissionList({
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [roundId]);
+  }, [roundId, sortBy]);
 
-  // initialSubmissions 변경 시 동기화
   useEffect(() => {
     setSubmissions(initialSubmissions);
   }, [initialSubmissions]);
@@ -74,24 +86,27 @@ export function SubmissionList({
     setMyVoteIds(new Set(initialVoteIds));
   }, [initialVoteIds]);
 
-  if (submissions.length === 0) {
-    return (
-      <p className="text-text-tertiary text-sm text-center py-8">
-        아직 제출된 글이 없습니다. 첫 번째로 작성해보세요!
-      </p>
-    );
-  }
-
   return (
-    <div className="space-y-4">
-      {submissions.map((submission) => (
-        <SubmissionCard
-          key={submission.id}
-          submission={submission}
-          isVoted={myVoteIds.has(submission.id)}
-          isMySubmission={submission.user_id === currentUserId}
-        />
-      ))}
-    </div>
+    <section>
+      <SubmissionHeader currentSort={sortBy} onSortChange={setSortBy} />
+
+      {sortedSubmissions.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-text-secondary text-sm">아직 제출된 글이 없습니다.</p>
+          <p className="text-text-tertiary text-xs mt-1">첫 번째로 작성해보세요!</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {sortedSubmissions.map((submission) => (
+            <SubmissionCard
+              key={submission.id}
+              submission={submission}
+              isVoted={myVoteIds.has(submission.id)}
+              isMySubmission={submission.user_id === currentUserId}
+            />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

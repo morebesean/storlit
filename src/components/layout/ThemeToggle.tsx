@@ -1,13 +1,21 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
+
+const subscribe = (cb: () => void) => {
+  // Trigger once on mount
+  const id = requestAnimationFrame(cb);
+  return () => cancelAnimationFrame(id);
+};
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false
+  );
 
   if (!mounted) {
     return <button className="w-8 h-8" aria-label="테마 전환" />;

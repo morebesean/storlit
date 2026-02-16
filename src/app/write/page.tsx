@@ -1,8 +1,16 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { WriteForm } from '@/components/story/WriteForm';
-import { StoryProgress } from '@/components/story/StoryProgress';
+import { ExpandableStory } from '@/components/story/ExpandableStory';
 import Link from 'next/link';
+
+function getContent(
+  submissions: { content: string }[] | { content: string } | null
+): string | null {
+  if (!submissions) return null;
+  if (Array.isArray(submissions)) return submissions[0]?.content || null;
+  return submissions.content;
+}
 
 export default async function WritePage() {
   const supabase = await createClient();
@@ -39,7 +47,16 @@ export default async function WritePage() {
     .eq('status', 'completed')
     .order('round_number', { ascending: true });
 
-  const story = currentRound.stories as { title: string };
+  const story = currentRound.stories as {
+    title: string;
+    seed_text: string | null;
+  };
+
+  const storyContent =
+    previousRounds?.map((r) => ({
+      round_number: r.round_number,
+      content: getContent(r.submissions) || '(채택된 글 없음)',
+    })) || [];
 
   return (
     <div className="space-y-6">
@@ -51,12 +68,12 @@ export default async function WritePage() {
       </div>
 
       {/* 지금까지의 스토리 */}
-      {previousRounds && previousRounds.length > 0 && (
+      {(story.seed_text || storyContent.length > 0) && (
         <div>
           <h2 className="text-sm font-semibold text-text-secondary mb-3">
             지금까지의 이야기
           </h2>
-          <StoryProgress rounds={previousRounds} />
+          <ExpandableStory seedText={story.seed_text} rounds={storyContent} />
         </div>
       )}
 

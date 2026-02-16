@@ -1,20 +1,30 @@
 import { createClient } from '@/lib/supabase/server';
-import { Timer } from '@/components/story/Timer';
-import { StoryProgress } from '@/components/story/StoryProgress';
+import { StoryOverview } from '@/components/story/StoryOverview';
+import { CurrentRoundInfo } from '@/components/story/CurrentRoundInfo';
 import { SubmissionList } from '@/components/story/SubmissionList';
 import Link from 'next/link';
 
+function getContent(
+  submissions: { content: string }[] | { content: string } | null
+): string | null {
+  if (!submissions) return null;
+  if (Array.isArray(submissions)) return submissions[0]?.content || null;
+  return submissions.content;
+}
+
 export default async function HomePage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // 1. 현재 active 라운드 조회
+  // 1. 현재 active 라운드 + 스토리 조회
   const { data: currentRound } = await supabase
     .from('rounds')
     .select('*, stories(*)')
     .eq('status', 'active')
     .single();
 
-  // 진행 중인 라운드 없음 → 빈 상태
   if (!currentRound) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
@@ -40,32 +50,73 @@ export default async function HomePage() {
     );
   }
 
-  // 2. 현재 라운드 제출글 조회
+  const story = currentRound.stories as {
+    title: string;
+    total_rounds: number;
+    seed_text: string | null;
+  };
+
+  // 2. 완료된 라운드 + 채택작 조회
+  const { data: completedRounds } = await supabase
+    .from('rounds')
+    .select(
+      'id, round_number, winning_submission_id, submissions!winning_submission_id(content)'
+    )
+    .eq('story_id', currentRound.story_id)
+    .eq('status', 'completed')
+    .order('round_number', { ascending: true });
+
+  // 3. 참여자 수 계산
+  const allRoundIds = [
+    ...(completedRounds?.map((r) => r.id) || []),
+    currentRound.id,
+  ];
+  const { data: participants } = await supabase
+    .from('submissions')
+    .select('user_id')
+    .in('round_id', allRoundIds);
+  const participantCount = new Set(participants?.map((p) => p.user_id)).size;
+
+  // 4. 전체 스토리 내용 (섹션 A용)
+  const storyContent =
+    completedRounds?.map((r) => ({
+      round_number: r.round_number,
+      content: getContent(r.submissions) || '(채택된 글 없음)',
+    })) || [];
+
+  // 5. 이전 채택작 또는 제시글 (섹션 B용)
+  const isFirstRound = currentRound.round_number === 1;
+  const previousContent = isFirstRound
+    ? story.seed_text
+    : completedRounds && completedRounds.length > 0
+      ? getContent(completedRounds[completedRounds.length - 1].submissions)
+      : null;
+
+  // 6. 현재 라운드 제출글 + 프로필 매핑
   const { data: rawSubmissions } = await supabase
     .from('submissions')
     .select('*')
     .eq('round_id', currentRound.id)
     .order('vote_count', { ascending: false });
 
-  // 제출글 작성자 프로필 별도 조회
   const userIds = [...new Set(rawSubmissions?.map((s) => s.user_id) || [])];
-  const { data: profiles } = userIds.length > 0
-    ? await supabase.from('profiles').select('id, nickname, avatar_url').in('id', userIds)
-    : { data: [] };
+  const { data: profiles } =
+    userIds.length > 0
+      ? await supabase
+          .from('profiles')
+          .select('id, nickname, avatar_url')
+          .in('id', userIds)
+      : { data: [] };
   const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
 
-  const submissions = rawSubmissions?.map((s) => ({
-    ...s,
-    profiles: profileMap.get(s.user_id) || null,
-  })) || [];
+  const submissions =
+    rawSubmissions?.map((s) => ({
+      ...s,
+      profiles: profileMap.get(s.user_id) || null,
+    })) || [];
 
-  // 3. 사용자의 투표/제출 정보 조회
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  // 7. 사용자 투표 정보
   let myVoteIds: string[] = [];
-
   if (user) {
     const { data: votes } = await supabase
       .from('votes')
@@ -74,59 +125,33 @@ export default async function HomePage() {
     myVoteIds = votes?.map((v) => v.submission_id) || [];
   }
 
-  // 4. 이전 라운드 채택글 조회
-  const { data: previousRounds } = await supabase
-    .from('rounds')
-    .select('round_number, submissions!winning_submission_id(content)')
-    .eq('story_id', currentRound.story_id)
-    .eq('status', 'completed')
-    .order('round_number', { ascending: true });
-
-  const story = currentRound.stories as {
-    title: string;
-    total_rounds: number;
-  };
-
   return (
-    <div className="space-y-6">
-      {/* 헤더: 스토리 제목 + 타이머 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-text-primary">
-            {story.title}
-          </h1>
-          <p className="text-sm text-text-secondary">
-            라운드 {currentRound.round_number} / {story.total_rounds}
-          </p>
-        </div>
-        <Timer endsAt={currentRound.ends_at} />
-      </div>
+    <div className="space-y-8">
+      {/* 섹션 A: 오늘의 이야기 */}
+      <StoryOverview
+        completedRounds={completedRounds?.length || 0}
+        totalRounds={story.total_rounds}
+        participantCount={participantCount}
+        seedText={story.seed_text}
+        storyContent={storyContent}
+      />
 
-      {/* 지금까지의 스토리 */}
-      {previousRounds && previousRounds.length > 0 && (
-        <StoryProgress rounds={previousRounds} />
-      )}
+      {/* 섹션 B: 지금 이야기 */}
+      <CurrentRoundInfo
+        roundNumber={currentRound.round_number}
+        totalRounds={story.total_rounds}
+        endsAt={currentRound.ends_at}
+        previousContent={previousContent}
+        isFirstRound={isFirstRound}
+      />
 
-      {/* 현재 라운드 제출글 */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-text-primary">
-            이번 라운드 제출글
-          </h2>
-          {user && (
-            <Link href="/write" className="text-sm text-accent font-medium">
-              글쓰기
-            </Link>
-          )}
-        </div>
-
-        <SubmissionList
-          initialSubmissions={submissions}
-          initialVoteIds={myVoteIds}
-          roundId={currentRound.id}
-          currentUserId={user?.id}
-        />
-      </div>
+      {/* 섹션 C: 참여 작품 */}
+      <SubmissionList
+        initialSubmissions={submissions}
+        initialVoteIds={myVoteIds}
+        roundId={currentRound.id}
+        currentUserId={user?.id}
+      />
 
       {/* 플로팅 글쓰기 버튼 (로그인 시) */}
       {user && (

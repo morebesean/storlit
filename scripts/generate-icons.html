@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head><title>Generate PWA Icons</title></head>
+<body>
+<p>Right-click each image and "Save Image As" to the public/icons/ directory.</p>
+
+<script>
+function createIcon(size, maskable) {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#6C63FF';
+  if (maskable) {
+    ctx.fillRect(0, 0, size, size);
+  } else {
+    const r = size * 0.15;
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    ctx.lineTo(size - r, 0);
+    ctx.quadraticCurveTo(size, 0, size, r);
+    ctx.lineTo(size, size - r);
+    ctx.quadraticCurveTo(size, size, size - r, size);
+    ctx.lineTo(r, size);
+    ctx.quadraticCurveTo(0, size, 0, size - r);
+    ctx.lineTo(0, r);
+    ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // "S" letter
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = `bold ${size * 0.55}px -apple-system, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('S', size / 2, size / 2 + size * 0.02);
+
+  const img = document.createElement('img');
+  img.src = canvas.toDataURL('image/png');
+  img.style.margin = '10px';
+
+  const label = document.createElement('p');
+  label.textContent = maskable
+    ? `icon-maskable-${size}.png`
+    : `icon-${size}.png`;
+
+  const link = document.createElement('a');
+  link.href = canvas.toDataURL('image/png');
+  link.download = label.textContent;
+  link.textContent = `Download ${label.textContent}`;
+  link.style.display = 'block';
+
+  document.body.appendChild(label);
+  document.body.appendChild(img);
+  document.body.appendChild(link);
+
+  return canvas;
+}
+
+createIcon(192, false);
+createIcon(512, false);
+createIcon(192, true);
+createIcon(512, true);
+
+// Apple touch icon (180)
+const appleCanvas = document.createElement('canvas');
+appleCanvas.width = 180;
+appleCanvas.height = 180;
+const actx = appleCanvas.getContext('2d');
+actx.fillStyle = '#6C63FF';
+actx.fillRect(0, 0, 180, 180);
+actx.fillStyle = '#FFFFFF';
+actx.font = 'bold 99px -apple-system, sans-serif';
+actx.textAlign = 'center';
+actx.textBaseline = 'middle';
+actx.fillText('S', 90, 93);
+const aimg = document.createElement('img');
+aimg.src = appleCanvas.toDataURL('image/png');
+aimg.style.margin = '10px';
+const alink = document.createElement('a');
+alink.href = appleCanvas.toDataURL('image/png');
+alink.download = 'apple-touch-icon.png';
+alink.textContent = 'Download apple-touch-icon.png';
+alink.style.display = 'block';
+document.body.appendChild(document.createElement('p')).textContent = 'apple-touch-icon.png';
+document.body.appendChild(aimg);
+document.body.appendChild(alink);
+</script>
+</body>
+</html>

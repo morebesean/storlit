@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   title: 'Storlit — 매일 함께 쓰는 릴레이 소설',
   description:
     '매일 한 편의 단편이 집단 창작으로 완성되는 참여형 릴레이 소설 플랫폼',
+  openGraph: {
+    title: 'Storlit — 매일 함께 쓰는 릴레이 소설',
+    description:
+      '매일 한 편의 단편이 집단 창작으로 완성되는 참여형 릴레이 소설 플랫폼',
+    type: 'website',
+    locale: 'ko_KR',
+    siteName: 'Storlit',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Storlit — 매일 함께 쓰는 릴레이 소설',
+    description:
+      '매일 한 편의 단편이 집단 창작으로 완성되는 참여형 릴레이 소설 플랫폼',
+  },
 };
 
 export default function RootLayout({
@@ -25,6 +39,15 @@ export default function RootLayout({
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#6C63FF" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+        <meta name="apple-mobile-web-app-title" content="Storlit" />
       </head>
       <body className="antialiased">
         <ThemeProvider>

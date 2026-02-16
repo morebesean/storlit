@@ -31,6 +31,20 @@ export async function submitStory(roundId: string, content: string) {
     return { error: '라운드가 종료되었습니다' };
   }
 
+  // 라운드당 최대 3개 제출 제한
+  const MAX_SUBMISSIONS_PER_ROUND = 3;
+  const { count } = await supabase
+    .from('submissions')
+    .select('*', { count: 'exact', head: true })
+    .eq('round_id', roundId)
+    .eq('user_id', user.id);
+
+  if ((count ?? 0) >= MAX_SUBMISSIONS_PER_ROUND) {
+    return {
+      error: `라운드당 최대 ${MAX_SUBMISSIONS_PER_ROUND}개까지 제출할 수 있습니다`,
+    };
+  }
+
   const { data, error } = await supabase
     .from('submissions')
     .insert({

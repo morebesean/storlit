@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { toggleVote } from '@/actions/vote';
+import { Badge } from '@/components/ui/Badge';
+import { formatTimeAgo } from '@/lib/utils';
 
 interface SubmissionCardProps {
   submission: {
@@ -9,6 +11,7 @@ interface SubmissionCardProps {
     content: string;
     vote_count: number;
     user_id: string;
+    created_at: string;
     profiles?: { nickname: string; avatar_url: string | null } | null;
   };
   isVoted: boolean;
@@ -28,7 +31,6 @@ export function SubmissionCard({
     if (voting || isMySubmission) return;
     setVoting(true);
 
-    // 낙관적 업데이트
     const newVoted = !voted;
     setVoted(newVoted);
     setVoteCount(newVoted ? voteCount + 1 : voteCount - 1);
@@ -36,28 +38,39 @@ export function SubmissionCard({
     const result = await toggleVote(submission.id);
 
     if (result.error) {
-      // 롤백
       setVoted(!newVoted);
       setVoteCount(submission.vote_count);
     }
     setVoting(false);
   };
 
+  const nickname = submission.profiles?.nickname || '익명';
+  const avatarUrl = submission.profiles?.avatar_url;
+
   return (
     <div className="bg-bg-surface border border-border rounded-lg p-4">
-      {/* 작성자 */}
+      {/* 작성자 정보 */}
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-6 h-6 rounded-full bg-bg-elevated flex-shrink-0" />
-        <span className="text-sm text-text-secondary">
-          {submission.profiles?.nickname || '익명'}
-        </span>
-        {isMySubmission && (
-          <span className="text-xs text-accent font-medium">내 글</span>
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={nickname}
+            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-bg-elevated flex-shrink-0" />
         )}
+        <span className="text-sm font-medium text-text-primary">@{nickname}</span>
+        {isMySubmission && <Badge variant="accent">내 글</Badge>}
+        <span className="text-xs text-text-tertiary ml-auto">
+          {formatTimeAgo(submission.created_at)}
+        </span>
       </div>
 
       {/* 내용 */}
-      <p className="text-text-primary story-text mb-4">{submission.content}</p>
+      <p className="text-text-primary story-text mb-4 line-clamp-3">
+        {submission.content}
+      </p>
 
       {/* 투표 버튼 */}
       <button

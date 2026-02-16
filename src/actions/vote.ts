@@ -15,7 +15,7 @@ export async function toggleVote(submissionId: string) {
 
   const { data: submission } = await supabase
     .from('submissions')
-    .select('user_id')
+    .select('user_id, round_id')
     .eq('id', submissionId)
     .single();
 
@@ -24,6 +24,17 @@ export async function toggleVote(submissionId: string) {
   }
   if (submission.user_id === user.id) {
     return { error: '자신의 글에는 투표할 수 없습니다' };
+  }
+
+  // 종료된 라운드 투표 차단
+  const { data: round } = await supabase
+    .from('rounds')
+    .select('status')
+    .eq('id', submission.round_id)
+    .single();
+
+  if (!round || round.status !== 'active') {
+    return { error: '종료된 라운드에서는 투표할 수 없습니다' };
   }
 
   const { data: existingVote } = await supabase

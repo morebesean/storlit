@@ -1,9 +1,44 @@
+import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ShareButton } from '@/components/share/ShareButton';
+import { KakaoShareButton } from '@/components/share/KakaoShareButton';
+import { TwitterShareButton } from '@/components/share/TwitterShareButton';
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const supabase = await createClient();
+  const { data: story } = await supabase
+    .from('stories')
+    .select('title, genre, seed_text')
+    .eq('id', id)
+    .single();
+
+  if (!story) return {};
+
+  const description = story.seed_text
+    ? story.seed_text.slice(0, 100) + '...'
+    : `${story.genre || '릴레이 소설'} — Storlit에서 함께 만든 이야기`;
+
+  return {
+    title: `${story.title} — Storlit`,
+    description,
+    openGraph: {
+      title: story.title,
+      description,
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary',
+      title: story.title,
+      description,
+    },
+  };
 }
 
 export default async function StoryDetailPage({ params }: Props) {
@@ -88,6 +123,11 @@ export default async function StoryDetailPage({ params }: Props) {
       {/* 본문 */}
       <div className="bg-bg-surface border border-border rounded-lg p-5">
         <div className="story-text text-text-primary space-y-4">
+          {story.seed_text && (
+            <div>
+              <p>{story.seed_text}</p>
+            </div>
+          )}
           {rounds?.map((round) => {
             const submission = round.winning_submission_id
               ? submissionMap.get(round.winning_submission_id)
@@ -116,6 +156,24 @@ export default async function StoryDetailPage({ params }: Props) {
           {authorIds.length}명의 작가가 함께 만든 이야기
         </p>
       )}
+
+      {/* 공유 */}
+      <div className="flex items-center justify-center gap-2">
+        <ShareButton
+          title={story.title}
+          text={`"${story.title}" — Storlit에서 함께 만든 릴레이 소설`}
+          url={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/archive/${story.id}`}
+        />
+        <KakaoShareButton
+          title={story.title}
+          description={story.seed_text?.slice(0, 50) || '릴레이 소설'}
+          url={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/archive/${story.id}`}
+        />
+        <TwitterShareButton
+          text={`"${story.title}" — Storlit에서 함께 만든 릴레이 소설`}
+          url={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/archive/${story.id}`}
+        />
+      </div>
     </div>
   );
 }
